@@ -1,0 +1,5 @@
+# Запуск команды для получение записей
+* * * * * /usr/local/bin/php /var/www/html/bin/console app:fetch-posts >> /var/log/cron.log 2>&1
+
+# Запуск команды для обработки неудачных запросов
+*/10 * * * * /usr/local/bin/php /var/www/html/bin/console app:retry-failed-requests >> /var/log/cron.log 2>&1

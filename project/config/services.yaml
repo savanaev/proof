@@ -1,0 +1,85 @@
+# config/services.yaml
+
+parameters:
+    # Тип клиента используемый при получении записей (direct, proxy)
+    #   - direct - прямое получение данных
+    #   - proxy - получение данных через прокси, с поочередной сменой IP-адреса
+    http_client_type: '%env(HTTP_CLIENT_TYPE)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Api\PostApi:
+        arguments:
+            $logger: '@logger'
+            $httpClient: '@App\HttpClient\AppHttpClientInterface'
+
+    App\Command\PostFetchCommand:
+        arguments:
+            $postFetcherService: '@App\Service\PostFetcherService'
+
+    App\HttpClient\DependencyRegistry:
+        calls:
+            - method: add
+              arguments: [ 'proxy', 'App\HttpClient\ProxyHttpClient', [ '@App\Service\ProxyRotatorService' ] ]
+            - method: add
+              arguments: [ 'direct', 'App\HttpClient\DirectHttpClient', [ '@http_client' ] ]
+
+    App\HttpClient\AppHttpClientFactory:
+        arguments:
+            $registry: '@App\HttpClient\DependencyRegistry'
+
+    App\HttpClient\AppHttpClientInterface:
+        factory: [ '@App\HttpClient\AppHttpClientFactory', 'create' ]
+        arguments:
+            - '%http_client_type%'
+            - '@Symfony\Contracts\HttpClient\HttpClientInterface'
+
+    App\Service\PostFetcherService:
+        arguments:
+            $logger: '@logger'
+            $postApi: '@App\Api\PostApi'
+            $postService: '@App\Service\PostService'
+            $failedRequestService: '@App\Service\FailedRequestService'
+            $stateService: '@App\Service\StateService'
+
+    App\Service\FailedRequestService:
+        arguments:
+            $logger: '@logger'
+            $postApi: '@App\Api\PostApi'
+            $postService: '@App\Service\PostService'
+            $repository: '@App\Repository\FailedRequestRepository'
+
+    App\Service\PostService:
+        arguments:
+            $postRepository: '@App\Repository\PostRepository'
+
+    App\Service\StateService:
+        arguments:
+            $repository: '@App\Repository\ProcessStateRepository'
+
+    App\Service\ProxyRotatorService:
+        arguments:
+            $client: '@http_client'
+            $proxyProvider: '@App\Service\ProxyProviders\BrightDataProvider'
+
+    App\Service\ProxyProviders\ProxyScrapeProvider:
+        arguments:
+            $logger: '@logger'
+            $client: '@http_client'
+        tags: [ 'app.proxy_provider' ]
+
+    App\Service\ProxyProviders\BrightDataProvider:
+        tags: [ 'app.proxy_provider' ]

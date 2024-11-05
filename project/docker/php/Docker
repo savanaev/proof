@@ -1,0 +1,21 @@
+FROM php:8.3-fpm
+
+RUN apt-get update && apt-get install -y \
+    zip \
+    git \
+    procps \
+    cron \
+    && docker-php-ext-install pdo pdo_mysql \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/custom-php.ini
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+COPY ./docker/crontabs/crontab /etc/cron.d/
+
+RUN chmod 644 /etc/cron.d/crontab
+
+RUN crontab /etc/cron.d/crontab
+
+CMD ["cron", "-f"]
