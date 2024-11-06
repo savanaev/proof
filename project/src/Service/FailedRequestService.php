@@ -109,8 +109,11 @@ readonly class FailedRequestService
      */
     public function saveFailedRequest(string $externalId, int $page): void
     {
-        $failedRequest = $this->createFailedRequest($externalId, $page);
-        $this->repository->save($failedRequest, true);
+        $existingPost = $this->repository->findOneBy(['externalId' => $externalId]);
+        if (!$existingPost) {
+            $failedRequest = $this->createFailedRequest($externalId, $page);
+            $this->repository->save($failedRequest, true);
+        }
     }
 
     /**

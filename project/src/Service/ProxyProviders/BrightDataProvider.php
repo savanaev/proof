@@ -32,7 +32,9 @@ class BrightDataProvider implements ProxyProviderInterface
         $proxy = $this->proxy();
 
         return [
-            ['proxy' => $proxy,],
+            [
+                'proxy' => $proxy,
+            ],
         ];
     }
 

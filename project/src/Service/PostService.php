@@ -31,28 +31,6 @@ readonly class PostService
      */
     public function processPosts(array $posts): bool
     {
-//        $entityManager = $this->postRepository->getEntityManager();
-//        $entityManager->beginTransaction();
-//
-//        try {
-//            foreach ($posts as $post) {
-//                $existingPost = $this->postRepository->findOneBy(['externalId' => $post['id']]);
-//                if (!$existingPost) {
-//                    $postEntity = $this->createPostEntity($post);
-//                    $entityManager->persist($postEntity);
-//                }
-//            }
-//
-//            $entityManager->flush();
-//            $entityManager->commit();
-//
-//        } catch (Exception $e) {
-//            $entityManager->rollback();
-//            throw new RuntimeException('Ошибка при сохранении постов: ' . $e->getMessage());
-//        }
-//
-//        return true;
-
         return $this->postRepository->savePostsTransactionally(
             $posts,
             fn($post) => $this->createPostEntity($post)

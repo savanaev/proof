@@ -47,11 +47,11 @@ readonly class ProxyScrapeProvider implements ProxyProviderInterface
             $response = $this->client->request('GET', $this->apiUrl);
             $data = $response->toArray();
 
-            if (empty($data['proxiesOptions'])) {
+            if (empty($data['proxies'])) {
                 throw new Exception('Список прокси ProxyScrape пуст');
             }
 
-            return array_column($data['proxiesOptions'], 'proxy');
+            return array_column($data['proxies'], 'proxy');
         } catch (ClientExceptionInterface|DecodingExceptionInterface|
         RedirectionExceptionInterface|ServerExceptionInterface|
         TransportExceptionInterface $e) {
