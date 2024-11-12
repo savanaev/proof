@@ -13,7 +13,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * Команда для получения данных по API.
@@ -77,7 +76,6 @@ class PostFetchCommand extends Command
             $this->postFetcherService->fetchAndProcessPosts($limit);
         } catch (
             ClientExceptionInterface|
-            TransportExceptionInterface|
             ServerExceptionInterface|
             RedirectionExceptionInterface $e
         ) {

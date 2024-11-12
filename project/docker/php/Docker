@@ -5,17 +5,26 @@ RUN apt-get update && apt-get install -y \
     git \
     procps \
     cron \
-    && docker-php-ext-install pdo pdo_mysql \
+    librabbitmq-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    pkg-config \
+    jq \
+    && docker-php-ext-install pdo pdo_mysql sockets pcntl \
+    && pecl install amqp redis \
+    && docker-php-ext-enable amqp redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./docker/php/php.ini /usr/local/etc/php/conf.d/custom-php.ini
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY ./docker/crontabs/crontab /etc/cron.d/
-
 RUN chmod 644 /etc/cron.d/crontab
-
 RUN crontab /etc/cron.d/crontab
+
+COPY ./docker/scripts/scale_workers.sh /usr/local/bin/scale_workers.sh
+RUN chmod +x /usr/local/bin/scale_workers.sh
 
 CMD ["cron", "-f"]

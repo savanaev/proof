@@ -3,13 +3,9 @@
 namespace App\Service;
 
 use App\Api\PostApi;
+use App\Message\PostMessage;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * Сервис для получения постов.
@@ -19,15 +15,14 @@ readonly class PostFetcherService
     /**
      * @param LoggerInterface $logger Логгер.
      * @param PostApi $postApi API для получения данных постов.
-     * @param PostService $postService Сервис для обработки данных постов.
      * @param StateService $stateService Сервис для управления состоянием загрузки постов.
+     * @param MessageBusInterface $bus
      */
     public function __construct(
         private LoggerInterface $logger,
         private PostApi $postApi,
-        private PostService $postService,
-        private FailedRequestService $failedRequestService,
-        private StateService $stateService
+        private StateService $stateService,
+        private MessageBusInterface $bus
     ) {
     }
 
@@ -51,18 +46,9 @@ readonly class PostFetcherService
             }
             $page++;
 
-            try {
-                $fullPosts = $this->postApi->fetchFullPosts($posts)->getPoolPosts();
-                $this->postService->processPosts($fullPosts);
-                $this->stateService->saveState('current_page', $currentPage);
-            } catch (RuntimeException $e) {
-                $fullPosts = $this->postApi->getPoolPosts();
-                $this->failedRequestService->handleFailedRequests($posts, $fullPosts, $currentPage);
-                $this->postService->processPosts($fullPosts);
+            $this->bus->dispatch(new PostMessage($posts, $currentPage));
 
-                $this->logger->error("Ошибка при получении постов: " . $e->getMessage());
-                continue;
-            }
+            $this->stateService->saveState('current_page', $currentPage);
         }
     }
 }

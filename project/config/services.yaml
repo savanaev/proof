@@ -51,16 +51,12 @@ services:
         arguments:
             $logger: '@logger'
             $postApi: '@App\Api\PostApi'
-            $postService: '@App\Service\PostService'
-            $failedRequestService: '@App\Service\FailedRequestService'
             $stateService: '@App\Service\StateService'
+            $bus: '@Symfony\Component\Messenger\MessageBusInterface'
 
     App\Service\FailedRequestService:
         arguments:
-            $logger: '@logger'
-            $postApi: '@App\Api\PostApi'
-            $postService: '@App\Service\PostService'
-            $repository: '@App\Repository\FailedRequestRepository'
+            $bus: '@Symfony\Component\Messenger\MessageBusInterface'
 
     App\Service\PostService:
         arguments:
@@ -83,3 +79,7 @@ services:
 
     App\Service\ProxyProviders\BrightDataProvider:
         tags: [ 'app.proxy_provider' ]
+
+    App\MessageHandler\PostMessageHandler:
+        tags:
+            - { name: 'messenger.message_handler' }
