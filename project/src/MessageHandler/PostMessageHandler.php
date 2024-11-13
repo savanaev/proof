@@ -51,6 +51,8 @@ readonly class PostMessageHandler
             $this->postService->processPosts($fullPosts);
 
             $this->logger->error("Ошибка при получении постов: " . $e->getMessage());
+
+            throw $e;
         }
 
     }

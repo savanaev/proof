@@ -12,9 +12,7 @@ framework:
                     auto_setup: true
                     persistent: true
             failed:
-                dsn: 'doctrine://default?queue_name=failed_messages'
-                options:
-                    auto_setup: true
+                dsn: 'doctrine://default'
 
         routing:
             'App\Message\PostMessage': async
