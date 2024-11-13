@@ -12,7 +12,7 @@ framework:
                     auto_setup: true
                     persistent: true
             failed:
-                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                dsn: 'doctrine://default?queue_name=failed_messages'
                 options:
                     auto_setup: true
 

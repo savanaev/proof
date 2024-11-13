@@ -1,3 +1,5 @@
 # Запуск команды для получение записей
 * * * * * /usr/local/bin/php /var/www/html/bin/console app:fetch-posts >> /var/log/cron.log 2>&1
 
+# Повторная отправка неудачных сообщений в очередь
+*/5 * * * * /usr/local/bin/php /var/www/html/bin/console messenger:failed:retry >> /var/log/messenger_failed_retry.log 2>&1
