@@ -14,7 +14,6 @@ framework:
             failed:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
-                    queue_name: 'failed_messages'
                     auto_setup: true
 
         routing:
